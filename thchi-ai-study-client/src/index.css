@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+@theme {
+  --my-gradient: linear-gradient(83deg, #58cc02 9.02%, #23ac38 90.81%);
+  --color-text-green: #23ac38;
+  --color-text-yellow: #ee9b1f;
+}
