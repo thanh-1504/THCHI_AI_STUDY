@@ -1,0 +1,363 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+  moduleFormat    = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum AccessType {
+  FREE
+  PREMIUM
+}
+
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum OrderStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum VocabularyLevel {
+  LEVEL_1 // Chưa thuộc
+  LEVEL_2 // Mới học
+  LEVEL_3 // Đang ghi nhớ
+  LEVEL_4 // Khá thuộc
+  LEVEL_5 // Rất thuộc — từ ngủ đông
+}
+
+enum PointAction {
+  LEARN_WORD       // Học từ mới
+  REVIEW_CORRECT   // Ôn tập đúng
+  COMPLETE_LESSON  // Hoàn thành bài học
+  STREAK_BONUS     // Thưởng duy trì streak
+}
+
+enum RankingPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+// ============================================================
+// USERS & AUTH
+// ============================================================
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  password     String?  // null nếu đăng nhập bằng Google
+  fullName     String    @map("full_name")
+  avatarUrl    String?   @map("avatar_url")
+  role         Role      @default(USER)
+  isActive     Boolean   @default(true) @map("is_active")
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  oauthAccounts      OauthAccount[]
+  subscriptions      UserSubscription[]
+  orders             Order[]
+  lessonProgress     UserLessonProgress[]
+  vocabularyProgress UserVocabularyProgress[]
+  notebooks          Notebook[]
+  aiReviewSessions   AiReviewSession[]
+  streak             UserStreak?
+  point              UserPoint?
+  pointHistories     UserPointHistory[]
+
+  @@map("users")
+}
+
+model OauthAccount {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  provider   String   // "google"
+  providerId String   @map("provider_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerId])
+  @@map("oauth_accounts")
+}
+
+// ============================================================
+// SUBSCRIPTION & PAYMENT
+// ============================================================
+
+model SubscriptionPlan {
+  id           String    @id @default(uuid())
+  name         String    // VD: "Gói 1 tháng", "Gói 1 năm"
+  durationDays Int       @map("duration_days")
+  price        Decimal   @db.Decimal(10, 2)
+  isActive     Boolean   @default(true) @map("is_active")
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  subscriptions UserSubscription[]
+  orders        Order[]
+
+  @@map("subscription_plans")
+}
+
+model UserSubscription {
+  id        String             @id @default(uuid())
+  userId    String             @map("user_id")
+  planId    String             @map("plan_id")
+  startDate DateTime           @map("start_date")
+  endDate   DateTime           @map("end_date")
+  status    SubscriptionStatus @default(ACTIVE)
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+
+  user User             @relation(fields: [userId], references: [id])
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@map("user_subscriptions")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  userId          String      @map("user_id")
+  planId          String      @map("plan_id")
+  amount          Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(PENDING)
+  paymentMethod   String?     @map("payment_method") // "vnpay"
+  transactionCode String?     @map("transaction_code")
+  vnpayResponse   Json?       @map("vnpay_response") // lưu toàn bộ response từ VNPay
+  paidAt          DateTime?   @map("paid_at")
+  deletedAt       DateTime?   @map("deleted_at")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  user User             @relation(fields: [userId], references: [id])
+  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+
+  @@map("orders")
+}
+
+// ============================================================
+// CONTENT: COURSE → LESSON → VOCABULARY
+// ============================================================
+
+model Course {
+  id           String     @id @default(uuid())
+  title        String
+  description  String?
+  thumbnailUrl String?    @map("thumbnail_url")
+  level        Level      @default(BEGINNER)
+  accessType   AccessType @default(FREE) @map("access_type")
+  sortOrder    Int        @default(0) @map("sort_order")
+  isActive     Boolean    @default(true) @map("is_active")
+  deletedAt    DateTime?  @map("deleted_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  lessons Lesson[]
+
+  @@map("courses")
+}
+
+model Lesson {
+  id          String     @id @default(uuid())
+  courseId    String     @map("course_id")
+  title       String
+  description String?
+  accessType  AccessType @default(FREE) @map("access_type")
+  sortOrder   Int        @default(0) @map("sort_order")
+  isActive    Boolean    @default(true) @map("is_active")
+  deletedAt   DateTime?  @map("deleted_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  course         Course               @relation(fields: [courseId], references: [id])
+  vocabularies   Vocabulary[]
+  lessonProgress UserLessonProgress[]
+
+  @@map("lessons")
+}
+
+model Vocabulary {
+  id           String    @id @default(uuid())
+  lessonId     String    @map("lesson_id")
+  word         String
+  phonetic     String?   // Phiên âm IPA, VD: /kæt/
+  audioUrl     String?   @map("audio_url")
+  meaningVi    String    @map("meaning_vi")    // Nghĩa tiếng Việt
+  definitionEn String?   @map("definition_en") // Định nghĩa tiếng Anh
+  example      String?   // Câu ví dụ
+  imageUrl     String?   @map("image_url")
+  sortOrder    Int       @default(0) @map("sort_order")
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  lesson             Lesson                   @relation(fields: [lessonId], references: [id])
+  vocabularyProgress UserVocabularyProgress[]
+  notebooks          Notebook[]
+
+  @@map("vocabularies")
+}
+
+// ============================================================
+// LEARNING PROGRESS TRACKING
+// ============================================================
+
+model UserLessonProgress {
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  lessonId      String    @map("lesson_id")
+  totalWords    Int       @default(0) @map("total_words")
+  learnedWords  Int       @default(0) @map("learned_words")
+  isCompleted   Boolean   @default(false) @map("is_completed")
+  lastStudiedAt DateTime? @map("last_studied_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([userId, lessonId])
+  @@map("user_lesson_progress")
+}
+
+model UserVocabularyProgress {
+  id             String          @id @default(uuid())
+  userId         String          @map("user_id")
+  vocabularyId   String          @map("vocabulary_id")
+  level          VocabularyLevel @default(LEVEL_1) // Cấp độ ghi nhớ 1–5
+  correctCount   Int             @default(0) @map("correct_count")
+  incorrectCount Int             @default(0) @map("incorrect_count")
+  nextReviewAt   DateTime?       @map("next_review_at") // Lịch ôn tập tiếp theo
+  lastReviewedAt DateTime?       @map("last_reviewed_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  user       User       @relation(fields: [userId], references: [id])
+  vocabulary Vocabulary @relation(fields: [vocabularyId], references: [id])
+
+  @@unique([userId, vocabularyId])
+  @@map("user_vocabulary_progress")
+}
+
+// ============================================================
+// NOTEBOOK (Sổ tay từ vựng)
+// ============================================================
+
+model Notebook {
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id")
+  vocabularyId String    @map("vocabulary_id")
+  // isMastered tự suy ra từ UserVocabularyProgress.level == LEVEL_5
+  // true = từ ngủ đông, false = từ ôn tập
+  isMastered   Boolean   @default(false) @map("is_mastered")
+  deletedAt    DateTime? @map("deleted_at")
+  savedAt      DateTime  @default(now()) @map("saved_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  user       User       @relation(fields: [userId], references: [id])
+  vocabulary Vocabulary @relation(fields: [vocabularyId], references: [id])
+
+  @@unique([userId, vocabularyId])
+  @@map("notebooks")
+}
+
+// ============================================================
+// STREAK (Chuỗi ngày học liên tiếp)
+// ============================================================
+
+model UserStreak {
+  id             String    @id @default(uuid())
+  userId         String    @unique @map("user_id")
+  currentStreak  Int       @default(0) @map("current_streak")  // Số ngày học liên tiếp hiện tại
+  longestStreak  Int       @default(0) @map("longest_streak")  // Chuỗi dài nhất từ trước đến nay
+  lastStudyDate  DateTime? @map("last_study_date")             // Ngày học gần nhất (chỉ lưu date)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_streaks")
+}
+
+// ============================================================
+// POINTS & RANKING (Điểm tích lũy và Bảng xếp hạng)
+// ============================================================
+
+model UserPoint {
+  id          String   @id @default(uuid())
+  userId      String   @unique @map("user_id")
+  totalPoints Int      @default(0) @map("total_points") // Tổng điểm tích lũy toàn thời gian
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("user_points")
+}
+
+model UserPointHistory {
+  id          String      @id @default(uuid())
+  userId      String      @map("user_id")
+  points      Int         // Số điểm được cộng trong lần này
+  action      PointAction // Lý do cộng điểm
+  description String?     // Mô tả thêm nếu cần
+  earnedAt    DateTime    @default(now()) @map("earned_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, earnedAt])
+  @@map("user_point_histories")
+}
+
+// View tổng hợp điểm theo kỳ để phục vụ ranking
+// Không dùng materialized view — tính toán realtime từ UserPointHistory
+// Lọc theo earnedAt trong khoảng ngày / tuần / tháng tương ứng
+
+// ============================================================
+// AI FEATURES
+// ============================================================
+
+model AiReviewSession {
+  id                   String   @id @default(uuid())
+  userId               String   @map("user_id")
+  weakVocabularyIds    String[] @map("weak_vocabulary_ids")    // Danh sách từ yếu
+  recommendedLessonIds String[] @map("recommended_lesson_ids") // Bài học được gợi ý
+  analysisSummary      String   @map("analysis_summary")       // Tóm tắt phân tích của AI
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("ai_review_sessions")
+}
