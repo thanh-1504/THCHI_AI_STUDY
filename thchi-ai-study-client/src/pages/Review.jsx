@@ -16,7 +16,7 @@ const data = [
   { level: "5", count: 1748, color: "#283593" },
 ];
 
-const Chart = () => {
+const Review = () => {
   return (
     <div className="w-full max-w-2xl mx-auto bg-white p-6">
       <ResponsiveContainer width="100%" height={350}>
@@ -81,4 +81,4 @@ const Chart = () => {
   );
 };
 
-export default Chart;
+export default Review;

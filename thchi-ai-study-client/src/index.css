@@ -5,3 +5,13 @@
   --color-text-green: #23ac38;
   --color-text-yellow: #ee9b1f;
 }
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE và Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}

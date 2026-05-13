@@ -1,22 +1,23 @@
-import Chart from "../utils/Chart";
+import { Outlet } from "react-router-dom";
 
 const Home = () => {
   return (
     <div className="flex items-start min-h-screen bg-white">
       {/* Sidebar Left */}
-      <div className="bg-[#f0f0f0] w-[25%] min-h-screen relative border-r border-gray-200">
-        <span className="fixed w-[25%] bottom-6 text-xl text-[#ff9600] font-semibold text-center">
+      <div className="bg-[#f0f0f0] w-[20%] self-stretch relative border-r border-gray-200">
+        <span className="fixed w-[20%] bottom-6 text-xl text-[#ff9600] font-semibold text-center">
           ThchiVocab ver0.0.1
         </span>
       </div>
 
       {/* Main Content */}
-      <div className="w-[50%] p-6">
-        <Chart />
+      <div className="w-[60%] p-6">
+        {/* <Chart /> */}
+        <Outlet />
       </div>
 
       {/* Sidebar Right */}
-      <div className="bg-[#f0f0f0] w-[25%] min-h-screen p-4 flex flex-col items-center gap-4 border-l border-gray-200">
+      <div className="bg-[#f0f0f0] w-[20%] self-stretch p-4 flex flex-col items-center gap-4 border-l border-gray-200">
         {/* Card 1: Số từ đã học */}
         <div className="relative w-full max-w-[280px] aspect-[16/10] bg-[url('/reviewwords.png')] bg-contain bg-no-repeat bg-center flex flex-col items-center justify-center">
           <div className="-translate-y-2 text-center">
