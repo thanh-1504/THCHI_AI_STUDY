@@ -1,7 +1,8 @@
 import { CircleX } from "lucide-react";
+import useUIStore from "../../../store/useUIStore";
 
-const HeaderModal = ({ setIsOpen }) => {
-  console.log(setIsOpen);
+const HeaderModal = () => {
+  const { setIsOpenModal } = useUIStore()
   return (
     <div>
       <div className="relative bg-yellow-400 h-18 flex items-center rounded-b-2xl">
@@ -9,7 +10,7 @@ const HeaderModal = ({ setIsOpen }) => {
         <button className="absolute left-5 z-50">
           <CircleX
             size={40}
-            onClick={() => setIsOpen(false)}
+            onClick={() => setIsOpenModal(false)}
             className="text-white hover:cursor-pointer drop-shadow-[0_4px_3px_rgba(0,0,0,0.20)] "
           />
         </button>

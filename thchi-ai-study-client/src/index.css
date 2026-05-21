@@ -2,16 +2,22 @@
 
 @theme {
   --my-gradient: linear-gradient(83deg, #58cc02 9.02%, #23ac38 90.81%);
+  --my-topic-green-gradient: linear-gradient(83.47deg, #58cc02 9.02%, #23ac38 90.81%);
+  --my-topic-green-hover-gradient: linear-gradient(83.47deg, #5edb01 100%, #5edb01 0);
   --color-text-green: #23ac38;
   --color-text-yellow: #ee9b1f;
+  --shadow-topic-green: 0 8px 0 0 rgba(35, 172, 56, 0.5);
 }
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE và Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE và Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }
