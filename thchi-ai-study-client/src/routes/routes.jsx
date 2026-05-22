@@ -4,6 +4,7 @@ import Dictionary from "../pages/Dictionary/Dictionary";
 import Home from "../pages/Home";
 import Learn from "../pages/Learn/Learn";
 import Review from "../pages/Review";
+import Notebook from "../pages/Notebook/Notebook";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
             element: <Learn />,
             path: "/learn",
           },
+          {
+            element: <Notebook />,
+            path: "/notebook"
+          }
         ],
       },
     ],
