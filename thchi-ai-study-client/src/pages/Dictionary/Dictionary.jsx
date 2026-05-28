@@ -4,7 +4,7 @@ import Word from "./components/Word";
 const Dictionary = () => {
   const [searchWord, setSearchWord] = useState(false);
   return (
-    <div>
+    <div className="pt-6">
       {/* Begin Input Search */}
       <div className="bg-blue-900 rounded-sm">
         <SearchInput></SearchInput>

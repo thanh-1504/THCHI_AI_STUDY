@@ -1,9 +1,13 @@
+import { useNavigate } from "react-router-dom"
+
 const StatsCard = ({
     variant = "yellow",
     imageURL = "/ThChi.png",
     number = 0,
-    label = "từ ôn tập"
+    label = "từ ôn tập",
+    path = "word-active"
 }) => {
+    const navigate = useNavigate();
 
     const borderVariants = {
         yellow: "border-yellow-400",
@@ -14,6 +18,7 @@ const StatsCard = ({
 
     return (
         <div
+            onClick={() => navigate(path)}
             className={`
                 bg-stas-card
                 rounded-xl
