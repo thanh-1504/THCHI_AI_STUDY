@@ -3,9 +3,10 @@ import App from "../app";
 import Dictionary from "../pages/Dictionary/Dictionary";
 import Home from "../pages/Home";
 import Learn from "../pages/Learn/Learn";
-import Review from "../pages/Review";
 import Notebook from "../pages/Notebook/Notebook";
 import NotebookActive from "../pages/Notebook/NotebookActive";
+import Rank from "../pages/Rank/Rank";
+import Review from "../pages/Review";
 
 const router = createBrowserRouter([
   {
@@ -26,12 +27,16 @@ const router = createBrowserRouter([
           },
           {
             element: <Notebook />,
-            path: "/notebook"
+            path: "/notebook",
           },
           {
             element: <NotebookActive />,
-            path: "/notebook/word-active"
-          }
+            path: "/notebook/word-active",
+          },
+          {
+            element: <Rank />,
+            path: "/rank",
+          },
         ],
       },
     ],

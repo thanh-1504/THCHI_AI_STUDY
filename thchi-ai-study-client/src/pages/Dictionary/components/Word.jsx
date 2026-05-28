@@ -29,7 +29,7 @@ const Word = () => {
             className="flex items-center gap-2 px-4 py-2 rounded-full bg-(image:--my-gradient) text-white font-semibold
               shadow-[0_6px_0_#1f8f2f]
               hover:brightness-105
-              active:shadow-[0_2px_0_#1f8f2f]
+              shadow-[0_5px_0_#1f8f2f] active:shadow-[0_2px_0_#1f8f2f] active:translate-y-1
               transition-all
               duration-100
               cursor-pointer
