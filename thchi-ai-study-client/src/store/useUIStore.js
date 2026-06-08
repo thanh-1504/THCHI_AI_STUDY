@@ -1,9 +1,11 @@
-import { create } from 'zustand'
+import { create } from "zustand";
 
 const useUIStore = create((set) => ({
-    isOpenModal: false,
-    isSelectedCourse: false,
-    setIsOpenModal: () => set((state) => ({ isOpenModal: !state.isOpenModal })),
-    setIsSelectedCourse: value => set({ isSelectedCourse: value })
-}))
-export default useUIStore
+  isOpenModal: false,
+  isOpenModalComment: false,
+  isSelectedCourse: false,
+  setIsOpenModal: () => set((state) => ({ isOpenModal: !state.isOpenModal })),
+  setIsOpenModalComment: (value) => set({ isOpenModalComment: value }),
+  setIsSelectedCourse: (value) => set({ isSelectedCourse: value }),
+}));
+export default useUIStore;

@@ -2,8 +2,16 @@
 
 @theme {
   --my-gradient: linear-gradient(83deg, #58cc02 9.02%, #23ac38 90.81%);
-  --my-topic-green-gradient: linear-gradient(83.47deg, #58cc02 9.02%, #23ac38 90.81%);
-  --my-topic-green-hover-gradient: linear-gradient(83.47deg, #5edb01 100%, #5edb01 0);
+  --my-topic-green-gradient: linear-gradient(
+    83.47deg,
+    #58cc02 9.02%,
+    #23ac38 90.81%
+  );
+  --my-topic-green-hover-gradient: linear-gradient(
+    83.47deg,
+    #5edb01 100%,
+    #5edb01 0
+  );
   --color-text-green: #23ac38;
   --color-text-yellow: #ee9b1f;
   --color-gray-input-search: #ececec;
@@ -27,4 +35,15 @@
 input {
   line-height: normal;
   vertical-align: middle;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: black;
+  font-size: 14px;
+  font-weight: 400;
+  font-style: italic;
+  pointer-events: none;
+  float: left;
+  height: 0;
 }

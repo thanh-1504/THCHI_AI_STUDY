@@ -1,12 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
-  moduleFormat    = "cjs"
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -14,350 +9,639 @@ datasource db {
 }
 
 enum Role {
-  USER
   ADMIN
+  USER
 }
 
-enum AccessType {
-  FREE
-  PREMIUM
+enum AuthProvider {
+  GOOGLE
 }
 
-enum Level {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-}
-
-enum SubscriptionStatus {
+enum AccountStatus {
   ACTIVE
-  EXPIRED
-  CANCELLED
+  INACTIVE
+  BANNED
 }
 
-enum OrderStatus {
+enum OtpType {
+  REGISTER
+  FORGOT_PASSWORD
+}
+
+enum ReviewStep {
+  LISTEN_AND_TYPE
+  CHOOSE_MEANING
+  FILL_WITH_EXAMPLE
+  FILL_NO_EXAMPLE
+  LISTEN_CHOOSE_WORD
+  LISTEN_CHOOSE_ANSWER
+  LISTEN_CHOOSE_MEANING
+}
+
+enum LearnStep {
+  FLASHCARD
+  LISTEN_AND_TYPE
+  FILL_IN_BLANK
+}
+
+enum WordStatus {
+  ACTIVE
+  SLEEPING
+}
+
+enum WordLevel {
+  LEVEL_1
+  LEVEL_2
+  LEVEL_3
+  LEVEL_4
+  LEVEL_5
+}
+
+enum WordType {
+  NOUN
+  VERB
+  ADJECTIVE
+  ADVERB
+  PREPOSITION
+  CONJUNCTION
+  PRONOUN
+  OTHER
+}
+
+enum PostStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum TransactionStatus {
   PENDING
   SUCCESS
   FAILED
   REFUNDED
 }
 
-enum VocabularyLevel {
-  LEVEL_1 // Chưa thuộc
-  LEVEL_2 // Mới học
-  LEVEL_3 // Đang ghi nhớ
-  LEVEL_4 // Khá thuộc
-  LEVEL_5 // Rất thuộc — từ ngủ đông
+enum PremiumDuration {
+  ONE_MONTH
+  THREE_MONTHS
+  ONE_YEAR
 }
 
-enum PointAction {
-  LEARN_WORD       // Học từ mới
-  REVIEW_CORRECT   // Ôn tập đúng
-  COMPLETE_LESSON  // Hoàn thành bài học
-  STREAK_BONUS     // Thưởng duy trì streak
+enum RankTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  DIAMOND
 }
-
-enum RankingPeriod {
-  DAILY
-  WEEKLY
-  MONTHLY
-}
-
-// ============================================================
-// USERS & AUTH
-// ============================================================
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  password     String?  // null nếu đăng nhập bằng Google
-  fullName     String    @map("full_name")
-  avatarUrl    String?   @map("avatar_url")
-  role         Role      @default(USER)
-  isActive     Boolean   @default(true) @map("is_active")
-  deletedAt    DateTime? @map("deleted_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  id        String        @id @default(uuid())
+  email     String        @unique
+  password  String?
+  role      Role          @default(USER)
+  status    AccountStatus @default(ACTIVE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  deletedAt DateTime?
 
-  // Relations
-  oauthAccounts      OauthAccount[]
-  subscriptions      UserSubscription[]
-  orders             Order[]
-  lessonProgress     UserLessonProgress[]
-  vocabularyProgress UserVocabularyProgress[]
-  notebooks          Notebook[]
-  aiReviewSessions   AiReviewSession[]
-  streak             UserStreak?
-  point              UserPoint?
-  pointHistories     UserPointHistory[]
+  profile           UserProfile?
+  oauthAccounts     OAuthAccount[]
+  subscription      Subscription?
+  transactions      Transaction[]
+  notebook          Notebook?
+  streakInfo        UserStreak?
+  rankInfo          UserRank?
+  learningLogs      LearningLog[]
+  reviewLogs        ReviewLog[]
+  reviewSessions    ReviewSession[]
+  learningSessions  LearningSession[]
+  courseEnrollments CourseEnrollment[]
+  posts             Post[]
+  postLikes         PostLike[]
+  comments          Comment[]
+  notifications     Notification[]
+  goalCommitments   GoalCommitment[]
+  userAchievements  UserAchievement[]
+  aiQuizLogs        AiQuizLog[]
+  adminAuditLogs    AdminAuditLog[]
 
   @@map("users")
 }
 
-model OauthAccount {
-  id         String   @id @default(uuid())
-  userId     String   @map("user_id")
-  provider   String   // "google"
-  providerId String   @map("provider_id")
-  createdAt  DateTime @default(now()) @map("created_at")
+model UserProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  displayName String
+  avatarUrl   String?
+  bio         String?
+  updatedAt   DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerId])
+  @@map("user_profiles")
+}
+
+model OAuthAccount {
+  id          String       @id @default(uuid())
+  userId      String
+  provider    AuthProvider
+  providerUid String
+  createdAt   DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUid])
   @@map("oauth_accounts")
 }
 
-// ============================================================
-// SUBSCRIPTION & PAYMENT
-// ============================================================
+model OtpCode {
+  id        String    @id @default(uuid())
+  email     String
+  type      OtpType
+  code      String
+  expiresAt DateTime
+  usedAt    DateTime?
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
 
-model SubscriptionPlan {
-  id           String    @id @default(uuid())
-  name         String    // VD: "Gói 1 tháng", "Gói 1 năm"
-  durationDays Int       @map("duration_days")
-  price        Decimal   @db.Decimal(10, 2)
-  isActive     Boolean   @default(true) @map("is_active")
-  deletedAt    DateTime? @map("deleted_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  subscriptions UserSubscription[]
-  orders        Order[]
-
-  @@map("subscription_plans")
+  @@map("otp_codes")
 }
 
-model UserSubscription {
-  id        String             @id @default(uuid())
-  userId    String             @map("user_id")
-  planId    String             @map("plan_id")
-  startDate DateTime           @map("start_date")
-  endDate   DateTime           @map("end_date")
-  status    SubscriptionStatus @default(ACTIVE)
-  createdAt DateTime           @default(now()) @map("created_at")
-  updatedAt DateTime           @updatedAt @map("updated_at")
+model AdminAuditLog {
+  id         String   @id @default(uuid())
+  adminId    String
+  action     String
+  targetType String
+  targetId   String
+  oldValue   Json?
+  newValue   Json?
+  note       String?
+  createdAt  DateTime @default(now())
 
-  user User             @relation(fields: [userId], references: [id])
-  plan SubscriptionPlan @relation(fields: [planId], references: [id])
+  admin User @relation(fields: [adminId], references: [id])
 
-  @@map("user_subscriptions")
+  @@map("admin_audit_logs")
 }
-
-model Order {
-  id              String      @id @default(uuid())
-  userId          String      @map("user_id")
-  planId          String      @map("plan_id")
-  amount          Decimal     @db.Decimal(10, 2)
-  status          OrderStatus @default(PENDING)
-  paymentMethod   String?     @map("payment_method") // "vnpay"
-  transactionCode String?     @map("transaction_code")
-  vnpayResponse   Json?       @map("vnpay_response") // lưu toàn bộ response từ VNPay
-  paidAt          DateTime?   @map("paid_at")
-  deletedAt       DateTime?   @map("deleted_at")
-  createdAt       DateTime    @default(now()) @map("created_at")
-  updatedAt       DateTime    @updatedAt @map("updated_at")
-
-  user User             @relation(fields: [userId], references: [id])
-  plan SubscriptionPlan @relation(fields: [planId], references: [id])
-
-  @@map("orders")
-}
-
-// ============================================================
-// CONTENT: COURSE → LESSON → VOCABULARY
-// ============================================================
-
-model Course {
-  id           String     @id @default(uuid())
-  title        String
-  description  String?
-  thumbnailUrl String?    @map("thumbnail_url")
-  level        Level      @default(BEGINNER)
-  accessType   AccessType @default(FREE) @map("access_type")
-  sortOrder    Int        @default(0) @map("sort_order")
-  isActive     Boolean    @default(true) @map("is_active")
-  deletedAt    DateTime?  @map("deleted_at")
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime   @updatedAt @map("updated_at")
-
-  // Relations
-  lessons Lesson[]
-
-  @@map("courses")
-}
-
-model Lesson {
-  id          String     @id @default(uuid())
-  courseId    String     @map("course_id")
-  title       String
-  description String?
-  accessType  AccessType @default(FREE) @map("access_type")
-  sortOrder   Int        @default(0) @map("sort_order")
-  isActive    Boolean    @default(true) @map("is_active")
-  deletedAt   DateTime?  @map("deleted_at")
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
-
-  // Relations
-  course         Course               @relation(fields: [courseId], references: [id])
-  vocabularies   Vocabulary[]
-  lessonProgress UserLessonProgress[]
-
-  @@map("lessons")
-}
-
-model Vocabulary {
-  id           String    @id @default(uuid())
-  lessonId     String    @map("lesson_id")
-  word         String
-  phonetic     String?   // Phiên âm IPA, VD: /kæt/
-  audioUrl     String?   @map("audio_url")
-  meaningVi    String    @map("meaning_vi")    // Nghĩa tiếng Việt
-  definitionEn String?   @map("definition_en") // Định nghĩa tiếng Anh
-  example      String?   // Câu ví dụ
-  imageUrl     String?   @map("image_url")
-  sortOrder    Int       @default(0) @map("sort_order")
-  deletedAt    DateTime? @map("deleted_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-
-  // Relations
-  lesson             Lesson                   @relation(fields: [lessonId], references: [id])
-  vocabularyProgress UserVocabularyProgress[]
-  notebooks          Notebook[]
-
-  @@map("vocabularies")
-}
-
-// ============================================================
-// LEARNING PROGRESS TRACKING
-// ============================================================
-
-model UserLessonProgress {
-  id            String    @id @default(uuid())
-  userId        String    @map("user_id")
-  lessonId      String    @map("lesson_id")
-  totalWords    Int       @default(0) @map("total_words")
-  learnedWords  Int       @default(0) @map("learned_words")
-  isCompleted   Boolean   @default(false) @map("is_completed")
-  lastStudiedAt DateTime? @map("last_studied_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-
-  user   User   @relation(fields: [userId], references: [id])
-  lesson Lesson @relation(fields: [lessonId], references: [id])
-
-  @@unique([userId, lessonId])
-  @@map("user_lesson_progress")
-}
-
-model UserVocabularyProgress {
-  id             String          @id @default(uuid())
-  userId         String          @map("user_id")
-  vocabularyId   String          @map("vocabulary_id")
-  level          VocabularyLevel @default(LEVEL_1) // Cấp độ ghi nhớ 1–5
-  correctCount   Int             @default(0) @map("correct_count")
-  incorrectCount Int             @default(0) @map("incorrect_count")
-  nextReviewAt   DateTime?       @map("next_review_at") // Lịch ôn tập tiếp theo
-  lastReviewedAt DateTime?       @map("last_reviewed_at")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
-
-  user       User       @relation(fields: [userId], references: [id])
-  vocabulary Vocabulary @relation(fields: [vocabularyId], references: [id])
-
-  @@unique([userId, vocabularyId])
-  @@map("user_vocabulary_progress")
-}
-
-// ============================================================
-// NOTEBOOK (Sổ tay từ vựng)
-// ============================================================
-
-model Notebook {
-  id           String    @id @default(uuid())
-  userId       String    @map("user_id")
-  vocabularyId String    @map("vocabulary_id")
-  // isMastered tự suy ra từ UserVocabularyProgress.level == LEVEL_5
-  // true = từ ngủ đông, false = từ ôn tập
-  isMastered   Boolean   @default(false) @map("is_mastered")
-  deletedAt    DateTime? @map("deleted_at")
-  savedAt      DateTime  @default(now()) @map("saved_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-
-  user       User       @relation(fields: [userId], references: [id])
-  vocabulary Vocabulary @relation(fields: [vocabularyId], references: [id])
-
-  @@unique([userId, vocabularyId])
-  @@map("notebooks")
-}
-
-// ============================================================
-// STREAK (Chuỗi ngày học liên tiếp)
-// ============================================================
 
 model UserStreak {
-  id             String    @id @default(uuid())
-  userId         String    @unique @map("user_id")
-  currentStreak  Int       @default(0) @map("current_streak")  // Số ngày học liên tiếp hiện tại
-  longestStreak  Int       @default(0) @map("longest_streak")  // Chuỗi dài nhất từ trước đến nay
-  lastStudyDate  DateTime? @map("last_study_date")             // Ngày học gần nhất (chỉ lưu date)
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  id                String    @id @default(uuid())
+  userId            String    @unique
+  currentStreak     Int       @default(0)
+  longestStreak     Int       @default(0)
+  lastStudiedDate   DateTime?
+  streakShieldCount Int       @default(0)
+  updatedAt         DateTime  @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_streaks")
 }
 
-// ============================================================
-// POINTS & RANKING (Điểm tích lũy và Bảng xếp hạng)
-// ============================================================
+model GoalCommitment {
+  id            String   @id @default(uuid())
+  userId        String
+  targetDays    Int
+  startDate     DateTime
+  endDate       DateTime
+  isCompleted   Boolean  @default(false)
+  shieldAwarded Int      @default(0)
+  createdAt     DateTime @default(now())
 
-model UserPoint {
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("goal_commitments")
+}
+
+model UserRank {
   id          String   @id @default(uuid())
-  userId      String   @unique @map("user_id")
-  totalPoints Int      @default(0) @map("total_points") // Tổng điểm tích lũy toàn thời gian
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  userId      String   @unique
+  currentTier RankTier @default(BRONZE)
+  xpThisWeek  Int      @default(0)
+  xpTotal     Int      @default(0)
+  weeklyRank  Int?
+  updatedAt   DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("user_points")
+  @@map("user_ranks")
 }
 
-model UserPointHistory {
-  id          String      @id @default(uuid())
-  userId      String      @map("user_id")
-  points      Int         // Số điểm được cộng trong lần này
-  action      PointAction // Lý do cộng điểm
-  description String?     // Mô tả thêm nếu cần
-  earnedAt    DateTime    @default(now()) @map("earned_at")
+model RankTierConfig {
+  id          String   @id @default(uuid())
+  tier        RankTier @unique
+  xpRequired  Int
+  description String?
 
-  user User @relation(fields: [userId], references: [id])
-
-  @@index([userId, earnedAt])
-  @@map("user_point_histories")
+  @@map("rank_tier_configs")
 }
 
-// View tổng hợp điểm theo kỳ để phục vụ ranking
-// Không dùng materialized view — tính toán realtime từ UserPointHistory
-// Lọc theo earnedAt trong khoảng ngày / tuần / tháng tương ứng
+model Achievement {
+  id          String @id @default(uuid())
+  title       String
+  description String
+  iconUrl     String?
+  condition   String
+  threshold   Int
 
-// ============================================================
-// AI FEATURES
-// ============================================================
+  userAchievements UserAchievement[]
 
-model AiReviewSession {
-  id                   String   @id @default(uuid())
-  userId               String   @map("user_id")
-  weakVocabularyIds    String[] @map("weak_vocabulary_ids")    // Danh sách từ yếu
-  recommendedLessonIds String[] @map("recommended_lesson_ids") // Bài học được gợi ý
-  analysisSummary      String   @map("analysis_summary")       // Tóm tắt phân tích của AI
-  createdAt            DateTime @default(now()) @map("created_at")
+  @@map("achievements")
+}
 
-  user User @relation(fields: [userId], references: [id])
+model UserAchievement {
+  id            String   @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
 
-  @@map("ai_review_sessions")
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model PremiumPlan {
+  id          String          @id @default(uuid())
+  name        String
+  duration    PremiumDuration
+  price       Decimal         @db.Decimal(12, 2)
+  description String?
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
+
+  subscriptions Subscription[]
+  transactions  Transaction[]
+
+  @@map("premium_plans")
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  planId    String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+  grantedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan PremiumPlan @relation(fields: [planId], references: [id])
+
+  @@map("subscriptions")
+}
+
+model Transaction {
+  id             String            @id @default(uuid())
+  userId         String
+  planId         String
+  amount         Decimal           @db.Decimal(12, 2)
+  status         TransactionStatus @default(PENDING)
+  paymentGateway String?
+  gatewayRef     String?           @unique
+  note           String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  user User        @relation(fields: [userId], references: [id])
+  plan PremiumPlan @relation(fields: [planId], references: [id])
+
+  @@map("transactions")
+}
+
+model DashboardStats {
+  id                String   @id @default(uuid())
+  totalUsers        Int
+  totalPremiumUsers Int
+  totalFreeUsers    Int
+  totalRevenue      Decimal  @db.Decimal(14, 2)
+  newUsersToday     Int
+  revenueToday      Decimal  @db.Decimal(14, 2)
+  activeSessions    Int
+  calculatedAt      DateTime @default(now())
+
+  @@map("dashboard_stats")
+}
+
+model Word {
+  id        String   @id @default(uuid())
+  term      String   @unique
+  phonetic  String?
+  audioUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  definitions     WordDefinition[]
+  examples        WordExample[]
+  mnemonics       WordMnemonic[]
+  topicWords      TopicWord[]
+  notebookEntries NotebookEntry[]
+  learningLogs    LearningLog[]
+  aiQuizLogs      AiQuizLog[]
+
+  @@map("words")
+}
+
+model WordDefinition {
+  id       String   @id @default(uuid())
+  wordId   String
+  wordType WordType
+  meaning  String
+
+  word Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@map("word_definitions")
+}
+
+model WordExample {
+  id            String   @id @default(uuid())
+  wordId        String
+  sentence      String
+  translation   String?
+  isAiGenerated Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  word Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@map("word_examples")
+}
+
+model WordMnemonic {
+  id            String   @id @default(uuid())
+  wordId        String
+  content       String
+  isAiGenerated Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  word Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@map("word_mnemonics")
+}
+
+model Course {
+  id          String    @id @default(uuid())
+  title       String
+  subtitle    String?
+  description String?
+  imageUrl    String?
+  isPremium   Boolean   @default(false)
+  isPublished Boolean   @default(false)
+  orderIndex  Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  topics      Topic[]
+  enrollments CourseEnrollment[]
+
+  @@map("courses")
+}
+
+model Topic {
+  id         String    @id @default(uuid())
+  courseId   String
+  title      String
+  subtitle   String?
+  imageUrl   String?
+  orderIndex Int
+  isPremium  Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  course           Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  topicWords       TopicWord[]
+  learningSessions LearningSession[]
+
+  @@unique([courseId, orderIndex])
+  @@map("topics")
+}
+
+model TopicWord {
+  id         String  @id @default(uuid())
+  topicId    String
+  wordId     String
+  orderIndex Int
+  imageUrl   String?
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  word  Word  @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, wordId])
+  @@map("topic_words")
+}
+
+model CourseEnrollment {
+  id             String    @id @default(uuid())
+  userId         String
+  courseId       String
+  enrolledAt     DateTime  @default(now())
+  completedAt    DateTime?
+  lastAccessedAt DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("course_enrollments")
+}
+
+model LearningSession {
+  id          String    @id @default(uuid())
+  userId      String
+  topicId     String
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+  xpEarned    Int       @default(0)
+  wordsCount  Int       @default(0)
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic        Topic         @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  learningLogs LearningLog[]
+  aiQuizLogs   AiQuizLog[]
+
+  @@map("learning_sessions")
+}
+
+model LearningLog {
+  id                String    @id @default(uuid())
+  userId            String
+  learningSessionId String
+  wordId            String
+  step              LearnStep
+  isCorrect         Boolean
+  attemptCount      Int       @default(1)
+  completedAt       DateTime  @default(now())
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  learningSession LearningSession @relation(fields: [learningSessionId], references: [id], onDelete: Cascade)
+  word            Word            @relation(fields: [wordId], references: [id])
+
+  @@map("learning_logs")
+}
+
+model AiQuizLog {
+  id                String   @id @default(uuid())
+  userId            String
+  learningSessionId String
+  wordId            String
+  questionType      String
+  isCorrect         Boolean
+  xpEarned          Int      @default(0)
+  answeredAt        DateTime @default(now())
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  learningSession LearningSession @relation(fields: [learningSessionId], references: [id], onDelete: Cascade)
+  word            Word            @relation(fields: [wordId], references: [id])
+
+  @@map("ai_quiz_logs")
+}
+
+model Notebook {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  totalWordsSaved Int      @default(0)
+  notebookLevel   Int      @default(1)
+  createdAt       DateTime @default(now())
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries NotebookEntry[]
+
+  @@map("notebooks")
+}
+
+model NotebookEntry {
+  id         String     @id @default(uuid())
+  notebookId String
+  wordId     String
+  level      WordLevel  @default(LEVEL_1)
+  status     WordStatus @default(ACTIVE)
+  savedAt    DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  nextReviewAt DateTime?
+  intervalDays Int       @default(1)
+  easeFactor   Float     @default(2.5)
+  reviewCount  Int       @default(0)
+
+  masteredAt DateTime?
+
+  notebook   Notebook    @relation(fields: [notebookId], references: [id], onDelete: Cascade)
+  word       Word        @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  reviewLogs ReviewLog[]
+
+  @@unique([notebookId, wordId])
+  @@map("notebook_entries")
+}
+
+model ReviewSession {
+  id           String    @id @default(uuid())
+  userId       String
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+  totalWords   Int       @default(0)
+  correctCount Int       @default(0)
+  xpEarned     Int       @default(0)
+  speedWpm     Float?
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewLogs ReviewLog[]
+
+  @@map("review_sessions")
+}
+
+model ReviewLog {
+  id              String     @id @default(uuid())
+  userId          String
+  reviewSessionId String
+  notebookEntryId String
+  step            ReviewStep
+  isCorrect       Boolean
+  answeredAt      DateTime   @default(now())
+
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewSession ReviewSession @relation(fields: [reviewSessionId], references: [id], onDelete: Cascade)
+  notebookEntry NotebookEntry @relation(fields: [notebookEntryId], references: [id], onDelete: Cascade)
+
+  @@map("review_logs")
+}
+
+model Post {
+  id         String     @id @default(uuid())
+  userId     String
+  title      String
+  content    String
+  imageUrl   String?
+  status     PostStatus @default(PENDING)
+  reviewedBy String?
+  reviewedAt DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  deletedAt  DateTime?
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes         PostLike[]
+  comments      Comment[]
+  notifications Notification[]
+
+  @@map("posts")
+}
+
+model PostLike {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@map("post_likes")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  postId    String?
+  createdAt DateTime @default(now())
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post? @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@map("notifications")
+}
+
+model EmailLog {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  sentAt    DateTime @default(now())
+  subject   String
+  isSuccess Boolean  @default(true)
+
+  @@map("email_logs")
 }

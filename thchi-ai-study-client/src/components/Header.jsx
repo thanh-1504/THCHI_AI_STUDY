@@ -104,7 +104,7 @@ const Header = () => {
               </div>
             </NavLink>
             <NavLink
-              to="thchi-hub"
+              to="community"
               className={({ isActive }) =>
                 isActive
                   ? "bg-gray-300 w-[16%] text-center"

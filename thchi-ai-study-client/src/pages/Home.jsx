@@ -9,7 +9,7 @@ const Home = () => {
       <SidebarLeft></SidebarLeft>
 
       {/* Main Content */}
-      <div className="w-[60%] pt-0 p-6 mx-auto">
+      <div className="w-[60%] pt-0 p-6 mx-auto bg-white">
         {/* <Chart /> */}
         <Outlet />
       </div>
