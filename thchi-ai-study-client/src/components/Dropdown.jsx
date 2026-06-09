@@ -1,22 +1,20 @@
 import { Settings, Trophy } from "lucide-react";
-import { useNavigate } from "react-router";
+import useUIStore from "../store/useUIStore";
 const Dropdown = ({ style = "", items = [] }) => {
-  const navigate = useNavigate();
+  const { setIsOpenAchievementModal, setIsOpenSettingModal } = useUIStore();
   items = [
     {
       icon: <Trophy className="text-yellow-400" size={25} />,
       label: "Thành tích học tập",
       onClick: () => {
-        navigate("/achievements");
-        setIsDropdownOpen(false);
+        setIsOpenAchievementModal(true);
       },
     },
     {
       icon: <Settings className="text-gray-400" />,
       label: "Cài đặt tài khoản",
       onClick: () => {
-        navigate("/settings");
-        setIsDropdownOpen(false);
+        setIsOpenSettingModal(true);
       },
     },
     ...items,

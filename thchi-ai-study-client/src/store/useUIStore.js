@@ -5,9 +5,13 @@ const useUIStore = create((set) => ({
   isOpenModalComment: false,
   isOpenDropdown: false,
   isSelectedCourse: false,
+  isOpenAchievementModal: false,
+  isOpenSettingModal: false,
   setIsOpenDropdown: (value) => set({ isOpenDropdown: value }),
   setIsOpenModal: () => set((state) => ({ isOpenModal: !state.isOpenModal })),
   setIsOpenModalComment: (value) => set({ isOpenModalComment: value }),
   setIsSelectedCourse: (value) => set({ isSelectedCourse: value }),
+  setIsOpenAchievementModal: (value) => set({ isOpenAchievementModal: value }),
+  setIsOpenSettingModal: (value) => set({ isOpenSettingModal: value }),
 }));
 export default useUIStore;

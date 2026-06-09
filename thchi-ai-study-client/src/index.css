@@ -2,6 +2,7 @@
 
 @theme {
   --my-gradient: linear-gradient(83deg, #58cc02 9.02%, #23ac38 90.81%);
+  --my-bg-green-gradient: linear-gradient(105deg, #53de69 0, #3ec654 83.85%);
   --my-topic-green-gradient: linear-gradient(
     83.47deg,
     #58cc02 9.02%,
@@ -46,6 +47,10 @@ input {
   pointer-events: none;
   float: left;
   height: 0;
+}
+
+.bg-green-gradient {
+  background: var(--my-bg-green-gradient);
 }
 
 @keyframes dropdownFadeIn {
