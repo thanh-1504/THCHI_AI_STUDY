@@ -1,6 +1,27 @@
-import { NavLink } from "react-router";
+import { useEffect, useRef } from "react";
+import { NavLink, useNavigate } from "react-router";
+import useUIStore from "../store/useUIStore";
+import Dropdown from "./Dropdown";
 
 const Header = () => {
+  const { isOpenDropdown, setIsOpenDropdown } = useUIStore();
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpenDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleAccountClick = () => {
+    setIsOpenDropdown(!isOpenDropdown);
+  };
+
   return (
     <header className="sticky z-50 top-0 flex items-center w-full shadow-[3px_5px_5px_hsla(0,0%,84%,0.58)] bg-white">
       {/* LOGO */}
@@ -125,15 +146,28 @@ const Header = () => {
         </nav>
       </section>
       {/* ACCOUNT USER */}
-      <section className="w-1/5 flex items-center justify-center gap-x-3 hover:opacity-80 hover:cursor-pointer transition-opacity">
-        <span className="text-xl text-[#ffcb08] font-semibold">Nhat Thanh</span>
-        <div className="w-12 h-12 ">
-          <img
-            src="/useravatar.png"
-            alt="user avatar"
-            className="w-full rounded-full"
-          />
+      <section
+        className="w-1/5 flex items-center justify-center relative"
+        ref={dropdownRef}
+      >
+        <div
+          onClick={handleAccountClick}
+          className="flex items-center gap-x-3 hover:opacity-80 hover:cursor-pointer transition-opacity"
+        >
+          <span className="text-xl text-[#ffcb08] font-semibold">
+            Nhat Thanh
+          </span>
+          <div className="w-12 h-12">
+            <img
+              src="/useravatar.png"
+              alt="user avatar"
+              className="w-full rounded-full"
+            />
+          </div>
         </div>
+
+        {/* DROPDOWN MENU */}
+        {isOpenDropdown && <Dropdown />}
       </section>
     </header>
   );
