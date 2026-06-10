@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import AchievementModal from "../components/modals/AchievementModal";
 import SettingModal from "../components/modals/SettingModal";
@@ -12,6 +13,14 @@ const Home = () => {
     setIsOpenAchievementModal,
     setIsOpenSettingModal,
   } = useUIStore();
+
+  // Hide scrollbar when modal is open
+  useEffect(() => {
+    if (isOpenAchievementModal || isOpenSettingModal)
+      document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+  }, [isOpenAchievementModal, isOpenSettingModal]);
+
   return (
     <div className="flex items-start min-h-screen bg-white">
       {/* Sidebar Left */}
@@ -26,10 +35,14 @@ const Home = () => {
       {/* Sidebar Right */}
       <SidebarRight></SidebarRight>
 
+      {/* Modal Account Setting And Modal Achievement */}
+
       {isOpenAchievementModal && (
         <AchievementModal onClose={() => setIsOpenAchievementModal(false)} />
       )}
-      {isOpenSettingModal && <SettingModal onClose={() => setIsOpenSettingModal(false)} />}
+      {isOpenSettingModal && (
+        <SettingModal onClose={() => setIsOpenSettingModal(false)} />
+      )}
     </div>
   );
 };
