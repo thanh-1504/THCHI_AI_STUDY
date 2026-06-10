@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../app";
+import AdminLogin from "../pages/Admin/AdminLogin";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
@@ -81,8 +82,8 @@ const router = createBrowserRouter([
 
   // Admin Routes
   {
-    path: "/admin",
-    element: "",
+    path: "/admin/login",
+    element: <AdminLogin />,
   },
 ]);
 export default router;
