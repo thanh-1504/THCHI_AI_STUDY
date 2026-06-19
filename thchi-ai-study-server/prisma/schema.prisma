@@ -97,10 +97,11 @@ enum RankTier {
 
 model User {
   id        String        @id @default(uuid())
+  name      String
   email     String        @unique
   password  String?
   role      Role          @default(USER)
-  status    AccountStatus @default(ACTIVE)
+  status    AccountStatus @default(INACTIVE)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   deletedAt DateTime?
@@ -164,7 +165,8 @@ model OtpCode {
   usedAt    DateTime?
   attempts  Int       @default(0)
   createdAt DateTime  @default(now())
-
+  @@index([email, type]) 
+  @@unique([email, type])
   @@map("otp_codes")
 }
 

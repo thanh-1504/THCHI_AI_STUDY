@@ -1,0 +1,14 @@
+import UserSchema from 'src/shared/schemas/user.schema';
+import z from 'zod';
+
+const LoginSchema = UserSchema.pick({
+  email: true,
+  password: true,
+}).strict();
+
+const LoginResponseSchema = z.object({
+  message: z.string(),
+});
+
+export { LoginResponseSchema, LoginSchema };
+export type LoginDto = z.infer<typeof LoginSchema>;

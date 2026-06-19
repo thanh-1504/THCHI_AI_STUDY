@@ -1,42 +1,32 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { ChevronLeft, Eye, EyeOff } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import ConfirmEmailModal from "../../components/modals/ConfirmEmailModal";
+import RegisterSchema from "../../schemas/register.schema";
 import useAuthStore from "../../store/useAuthStore";
-
 const Register = () => {
   const navigate = useNavigate();
   const {
-    name,
-    email,
-    password,
+    register,
+    watch,
+    formState: { errors, isValid },
+  } = useForm({
+    mode: "onChange",
+    resolver: yupResolver(RegisterSchema),
+  });
+  const {
     showPassword,
     showConfirmModal,
-    loading,
+    setShowPassword,
+    setShowConfirmModal,
     setName,
     setEmail,
     setPassword,
-    setShowPassword,
-    setShowConfirmModal,
-    setLoading,
   } = useAuthStore();
 
-  // Kích hoạt nút khi cả 3 trường đều có dữ liệu và email hợp lệ
-  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-  const isReady = name.trim() !== "" && isValidEmail && password.length >= 1;
-
-  const handleSubmit = () => {
-    if (!isReady) return;
-    setShowConfirmModal(true);
-  };
-
-  const handleConfirm = async () => {
-    setLoading(true);
-    // TODO: gọi API đăng ký / gửi OTP
-    await new Promise((r) => setTimeout(r, 700));
-    setLoading(false);
-    setShowConfirmModal(false);
-    navigate("/verify-email", { state: { email: email.trim() } });
-  };
+  const emailValue = watch("email");
+  const passwordValue = watch("password");
 
   return (
     <div className="bg-[#f0f0f0] w-full min-h-screen">
@@ -71,12 +61,13 @@ const Register = () => {
           </h2>
 
           {/* Form */}
-          <div className="w-[60%] flex flex-col gap-4">
+          <form className="w-[60%] flex flex-col gap-4">
             {/* Tên */}
             <input
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              {...register("name", {
+                onChange: (e) => setName(e.target.value),
+              })}
               placeholder="Tên của bạn"
               className="
                 w-full border border-gray-200 rounded-2xl px-5 py-4
@@ -85,12 +76,16 @@ const Register = () => {
                 transition-all duration-150
               "
             />
+            {errors.name?.message && (
+              <p className="text-red-400 text-sm">{errors.name.message}</p>
+            )}
 
             {/* Email */}
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              {...register("email", {
+                onChange: (e) => setEmail(e.target.value),
+              })}
               placeholder="Nhập chính xác email của bạn"
               className="
                 w-full border border-gray-200 rounded-2xl px-5 py-4
@@ -99,70 +94,98 @@ const Register = () => {
                 transition-all duration-150
               "
             />
+            {errors.email?.message && (
+              <p className="text-red-400 text-sm">{errors.email.message}</p>
+            )}
 
             {/* Password */}
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Tạo mật khẩu (dễ nhớ chút nhé ^^)"
-                className="
-                  w-full border border-gray-200 rounded-2xl px-5 py-4 pr-20
-                  text-gray-700 text-base outline-none bg-white
-                  focus:border-amber-400 focus:ring-2 focus:ring-amber-100
-                  transition-all duration-150
-                "
-              />
-              {password.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500 font-semibold text-sm cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1"
-                >
-                  {showPassword ? (
-                    <>
-                      <EyeOff size={15} />
-                      <span>Ẩn</span>
-                    </>
-                  ) : (
-                    <>
-                      <Eye size={15} />
-                      <span>Hiện thị</span>
-                    </>
-                  )}
-                </button>
+            <div className="w-full">
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  {...register("password", {
+                    onChange: (e) => setPassword(e.target.value),
+                  })}
+                  placeholder="Tạo mật khẩu (dễ nhớ chút nhé ^^)"
+                  className="
+        w-full
+        border border-gray-200
+        rounded-2xl
+        px-5 py-4
+        pr-24
+        text-gray-700
+        outline-none
+        bg-white
+        focus:border-amber-400
+        focus:ring-2
+        focus:ring-amber-100
+        transition-all
+      "
+                />
+
+                {passwordValue?.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="
+          absolute
+          right-5
+          top-1/2
+          -translate-y-1/2
+          text-green-500
+          font-semibold
+          text-sm
+          flex
+          items-center
+          gap-1
+          cursor-pointer
+          hover:opacity-80
+        "
+                  >
+                    {showPassword ? (
+                      <>
+                        <EyeOff size={16} />
+                        <span>Ẩn</span>
+                      </>
+                    ) : (
+                      <>
+                        <Eye size={16} />
+                        <span>Hiện</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {errors.password?.message && (
+                <p className="text-red-400 text-sm mt-2">
+                  {errors.password.message}
+                </p>
               )}
             </div>
-          </div>
-
-          {/* Submit button */}
-          <button
-            onClick={handleSubmit}
-            disabled={!isReady}
-            className={`
-              w-[40%] py-3 rounded-full text-base font-semibold
-              transition-all duration-200
+            {/* Submit button */}
+            <button
+              type="button"
+              onClick={() => setShowConfirmModal(true)}
+              className={`
+              w-[60%] py-3 rounded-full text-base font-semibold
+              transition-all duration-200 mx-auto
               ${
-                isReady
+                isValid
                   ? "bg-(image:--my-gradient) text-white shadow-[0_5px_0_#1f8f2f] hover:opacity-90 active:shadow-none active:translate-y-[3px] cursor-pointer"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none"
               }
             `}
-          >
-            Nhận mã xác thực
-          </button>
+            >
+              Nhận mã xác thực
+            </button>
+          </form>
         </div>
       </div>
 
       {/* Confirm email modal */}
       {showConfirmModal && (
-        <ConfirmEmailModal
-          email={email.trim()}
-          onClose={() => setShowConfirmModal(false)}
-          onConfirm={handleConfirm}
-          loading={loading}
-        />
+        <ConfirmEmailModal onClose={() => setShowConfirmModal(false)} />
       )}
     </div>
   );

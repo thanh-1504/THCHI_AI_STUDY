@@ -1,24 +1,38 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { X } from "lucide-react";
-import { useRef } from "react";
 import { createPortal } from "react-dom";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import ForgotPasswordSchema from "../../schemas/forgot.password.schema";
+import authService from "../../services/auth.service";
 import useAuthStore from "../../store/useAuthStore";
 
 const ForgotEmailModal = ({ onClose }) => {
-  const inputRef = useRef(null);
   const navigate = useNavigate();
   const { email, setEmail, loading, setLoading } = useAuthStore();
-  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm({
+    mode: "onChange",
+    resolver: yupResolver(ForgotPasswordSchema),
+  });
 
-  const handleSubmit = async () => {
-    if (!isValidEmail || loading) return;
+  const handleForgotSubmit = async () => {
+    if (!isValid) return;
     setLoading(true);
-    // TODO: gọi API gửi OTP
-    // await sendForgotPasswordEmail(email.trim());
-    await new Promise((r) => setTimeout(r, 600)); // giả lập delay
-    setLoading(false);
-    onClose();
-    navigate("/forgot-password", { state: { email: email.trim() } });
+    try {
+      await authService.forgotPassword({ email });
+      setLoading(false);
+      onClose();
+      navigate("/verify-email", {
+        state: { email: email.trim(), type: "FORGOT_PASSWORD" },
+      });
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -53,39 +67,46 @@ const ForgotEmailModal = ({ onClose }) => {
           <h2 className="text-lg font-semibold text-gray-800 text-center leading-snug">
             Nhập email chính xác để nhận mã xác thực
           </h2>
-
-          {/* Email input */}
-          <input
-            ref={inputRef}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Nhập email tài khoản học"
-            autoFocus
-            className="
+          <form onSubmit={handleSubmit(handleForgotSubmit)}>
+            {/* Email input */}
+            <input
+              {...register("email", {
+                onChange: (e) => setEmail(e.target.value),
+              })}
+              type="email"
+              onKeyDown={handleKeyDown}
+              placeholder="Nhập email tài khoản học"
+              autoFocus
+              className="
               w-full border border-gray-200 rounded-xl px-4 py-3
               text-gray-700 text-base outline-none
               focus:border-amber-400 focus:ring-2 focus:ring-amber-100
               transition-all duration-150 bg-gray-50
             "
-          />
+            />
 
-          {/* Submit button */}
-          <button
-            onClick={handleSubmit}
-            disabled={!isValidEmail || loading}
-            className={` p-3 rounded-2xl text-base font-semibold
-              transition-all duration-200 w-[50%] mx-auto
+            {/* Error message */}
+            {errors?.email && (
+              <p className="text-red-400 text-sm mt-1">
+                {errors.email.message}
+              </p>
+            )}
+            {/* Submit button */}
+            <button
+              type="submit"
+              disabled={!isValid || loading}
+              className={`p-3 rounded-2xl text-base font-semibold
+              transition-all duration-200 w-[50%] mx-auto mt-5 flex justify-center
               ${
-                isValidEmail && !loading
+                isValid && !loading
                   ? "bg-(image:--my-gradient) text-white shadow-[0_5px_0_#1f8f2f] hover:opacity-90 active:shadow-none active:translate-y-[3px] cursor-pointer"
                   : "bg-gray-200 text-gray-400 cursor-not-allowed"
               }
             `}
-          >
-            {loading ? "Đang gửi..." : "Nhận mã ngay"}
-          </button>
+            >
+              {loading ? "Đang gửi..." : "Nhận mã ngay"}
+            </button>
+          </form>
         </div>
       </div>
     </>,

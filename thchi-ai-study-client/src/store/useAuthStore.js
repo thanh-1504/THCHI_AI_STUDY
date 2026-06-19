@@ -13,6 +13,16 @@ const useAuthStore = create((set) => ({
   setShowPassword: (showPassword) => set({ showPassword }),
   showConfirmModal: false,
   setShowConfirmModal: (showConfirmModal) => set({ showConfirmModal }),
+  accessToken: null,
+  refreshToken: null,
+  setTokens: ({ accessToken, refreshToken }) => {
+    set({ accessToken, refreshToken });
+  },
+  user: null,
+  setUser: (user) => set({ user }),
+  logout: () => {
+    set({ accessToken: null, refreshToken: null, user: null });
+  },
 }));
 
 export default useAuthStore;

@@ -1,11 +1,16 @@
+import { useNavigate } from "react-router-dom";
 import useUIStore from "../../../store/useUIStore";
 const ItemCourse = () => {
-  const { setIsOpenModal, setIsSelectedCourse } = useUIStore()
+ 
+  const { setIsOpenModal, setIsSelectedCourse } = useUIStore();
   return (
-    <div onClick={() => {
-      setIsOpenModal(false);
-      setIsSelectedCourse(true);
-    }} className="px-3 py-2 bg-yellow-400 shadow-lg mt-5 mx-40 rounded-2xl hover:opacity-80 transition-opacity duration-100 hover:cursor-pointer">
+    <div
+      onClick={() => {
+        setIsOpenModal(false);
+        setIsSelectedCourse(true);
+      }}
+      className="px-3 py-2 bg-yellow-400 shadow-lg mt-5 mx-40 rounded-2xl hover:opacity-80 transition-opacity duration-100 hover:cursor-pointer"
+    >
       <p className="uppercase text-neutral-800 font-semibold pl-4 text-2xl mb-4 mt-2">
         1000 TỪ CƠ BẢN
       </p>

@@ -1,6 +1,27 @@
 import { X } from "lucide-react";
 import { createPortal } from "react-dom";
-const ConfirmEmailModal = ({ email, onClose, onConfirm, loading }) => {
+import { useNavigate } from "react-router-dom";
+import authService from "../../services/auth.service";
+import useAuthStore from "../../store/useAuthStore";
+const ConfirmEmailModal = ({ onClose }) => {
+  const navigate = useNavigate();
+  const { name, email, password, setLoading, setShowConfirmModal, loading } =
+    useAuthStore();
+
+  const handleConfirm = async () => {
+    try {
+      await authService.register({ name, email, password });
+      setShowConfirmModal(false);
+      navigate("/verify-email", {
+        state: { email: email.trim(), type: "REGISTER" },
+      });
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      setShowConfirmModal(false);
+    }
+  };
+
   return createPortal(
     <>
       {/* Backdrop */}
@@ -32,8 +53,8 @@ const ConfirmEmailModal = ({ email, onClose, onConfirm, loading }) => {
 
           {/* Confirm button */}
           <button
-            onClick={onConfirm}
             disabled={loading}
+            onClick={handleConfirm}
             className="
               w-[60%] mx-auto py-3 rounded-2xl font-semibold text-white text-base
               bg-(image:--my-gradient)

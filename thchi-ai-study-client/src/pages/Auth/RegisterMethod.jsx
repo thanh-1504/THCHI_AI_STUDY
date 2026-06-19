@@ -5,7 +5,9 @@ import GoogleIcon from "../../components/icons/GoogleIcon";
 const RegisterMethod = () => {
   const navigate = useNavigate();
 
-  const handleGoogleRegister = () => {};
+  const handleGoogleRegister = () => {
+    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+  };
 
   const handleEmailRegister = () => {
     navigate("/register-email");

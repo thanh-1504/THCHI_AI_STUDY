@@ -1,14 +1,15 @@
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import authService from "../../services/auth.service";
 
 const RESEND_DELAY = 60;
 
 const VerifyEmail = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const email = location.state?.email ?? "";
-
+  const email = location.state?.email;
+  const type = location.state?.type;
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(RESEND_DELAY);
@@ -50,11 +51,26 @@ const VerifyEmail = () => {
   const handleVerify = async () => {
     if (otp.trim().length === 0 || loading) return;
     setLoading(true);
-    // TODO: gọi API xác thực OTP đăng ký
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    // TODO: navigate về trang chủ / login sau khi xác thực thành công
-    navigate("/login");
+    try {
+      const res = await authService.verifyOtp({
+        email: email.trim(),
+        code: otp,
+        type,
+      });
+      console.log(res);
+      if (type === "FORGOT_PASSWORD") {
+        navigate("/reset-password", {
+          state: { email: email.trim(), token: res?.data?.resetToken },
+        });
+      }
+      if (type === "REGISTER") {
+        navigate("/review");
+      }
+      setLoading(false);
+    } catch (error) {
+      console.log("Lỗi xác thực OTP:", error);
+      setLoading(false);
+    }
   };
 
   const handleOtpChange = (e) => {
@@ -63,7 +79,6 @@ const VerifyEmail = () => {
   };
 
   const isReady = otp.trim().length > 0;
-
   return (
     <div className="bg-[#f0f0f0] w-full min-h-screen">
       <div className="w-[60%] min-h-screen mx-auto bg-white">
@@ -80,7 +95,11 @@ const VerifyEmail = () => {
               transition-all duration-150
             "
           >
-            <ChevronLeft size={20} className="text-gray-600" strokeWidth={2.5} />
+            <ChevronLeft
+              size={20}
+              className="text-gray-600"
+              strokeWidth={2.5}
+            />
           </button>
           <h2 className="flex-1 text-center text-2xl font-semibold text-gray-800 pr-9">
             Tạo tài khoản mới
@@ -163,7 +182,9 @@ const VerifyEmail = () => {
                   Nhận 1 mã mới{" "}
                   <span className="font-normal">
                     (chờ{" "}
-                    <span className="font-bold text-amber-500">{countdown}s</span>
+                    <span className="font-bold text-amber-500">
+                      {countdown}s
+                    </span>
                     )
                   </span>
                 </button>

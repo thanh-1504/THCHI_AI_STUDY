@@ -1,10 +1,36 @@
-import { Link } from "react-router-dom";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
 import GoogleIcon from "../../components/icons/GoogleIcon";
 import ForgotEmailModal from "../../components/modals/ForgotEmailModal";
+import LoginSchema from "../../schemas/login.schema";
+import authService from "../../services/auth.service";
 import useUIStore from "../../store/useUIStore";
 
 const Login = () => {
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm({
+    resolver: yupResolver(LoginSchema),
+    mode: "onChange",
+  });
   const { showForgotModal, setShowForgotModal } = useUIStore();
+  const handleLogin = async (data) => {
+    if (!isValid) return;
+    try {
+      await authService.login({
+        email: data.email,
+        password: data.password,
+      });
+      navigate("/review");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="bg-[#f0f0f0] w-full min-h-screen">
       <div className="w-[60%] min-h-screen mx-auto bg-white">
@@ -19,6 +45,9 @@ const Login = () => {
             Đăng nhập tài khoản học ThChi
           </h2>
           <button
+            onClick={() => {
+              window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+            }}
             className="
             min-w-66
             flex items-center justify-center gap-x-5
@@ -40,18 +69,24 @@ const Login = () => {
         </div>
 
         {/* Login With Email And Password */}
-        <div className="flex flex-col gap-y-5">
+        <form
+          onSubmit={handleSubmit(handleLogin)}
+          className="flex flex-col gap-y-5"
+        >
           <input
+            {...register("email")}
             type="text"
             placeholder="Nhập email tài khoản"
             className="w-[45%] mx-auto rounded-xl p-4 outline-none bg-gray-100"
           />
           <input
+            {...register("password")}
             type="password"
             placeholder="Nhập chính xác mật khẩu của bạn"
             className="w-[45%] mx-auto rounded-xl p-4 outline-none bg-gray-100"
           />
           <button
+            type="submit"
             className="
             min-w-60
             flex items-center justify-center gap-x-5
@@ -66,7 +101,7 @@ const Login = () => {
           >
             Đăng nhập
           </button>
-        </div>
+        </form>
 
         {/* Forgot Password And Register */}
         <div className="mt-8 flex flex-col gap-y-3">
