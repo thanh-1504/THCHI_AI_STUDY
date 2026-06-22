@@ -1,0 +1,44 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/shared/services/prisma.service';
+import { CreateCourseEnrollType } from '../schemas/course-enroll.schema';
+
+@Injectable()
+export class CourseEnrollRepo {
+  constructor(private readonly prismaService: PrismaService) {}
+
+  findOne(userId: string, courseId: string) {
+    return this.prismaService.courseEnrollment.findUnique({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        },
+      },
+    });
+  }
+
+  findAll(userId: string) {
+    return this.prismaService.courseEnrollment.findMany({
+      where: {
+        userId,
+      },
+      include: {
+        course: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
+  }
+
+  create(payload: CreateCourseEnrollType, userId: string) {
+    return this.prismaService.courseEnrollment.create({
+      data: {
+        userId,
+        courseId: payload.courseId,
+      },
+    });
+  }
+}

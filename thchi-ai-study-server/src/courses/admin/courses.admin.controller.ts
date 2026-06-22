@@ -1,0 +1,44 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { CreateCourseDTO } from '../dto/create-course.dto';
+import { PaginationQueryDTO } from '../dto/pagination.dto';
+import { UpdateCourseDTO } from '../dto/update-course.dto';
+import { CoursesAdminService } from './courses.amin.service';
+
+@Controller('admin/courses')
+export class CoursesAdminController {
+  constructor(private readonly coursesService: CoursesAdminService) {}
+
+  @Post()
+  create(@Body() createCourseDto: CreateCourseDTO) {
+    return this.coursesService.create(createCourseDto);
+  }
+
+  @Get()
+  findAll(@Query() paginationQueryDTO: PaginationQueryDTO) {
+    return this.coursesService.findAll(paginationQueryDTO);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.coursesService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDTO) {
+    return this.coursesService.update(id, updateCourseDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.coursesService.remove(id);
+  }
+}

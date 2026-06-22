@@ -8,8 +8,15 @@ import { AuthModule } from './auth/auth.module';
 import { MyZodValidationPipe } from './auth/config/custom-zod-validation';
 import { HttpExceptionFilter } from './auth/config/http-exception.filter';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { CoursesAdminModule } from './courses/admin/courses.admin.module';
 import { SharedModule } from './shared/modules/shared.module';
+import { TopicWordModule } from './topic-word/topic-word.module';
+import { TopicModule } from './topic/topic.module';
 import { UserModule } from './user/user.module';
+import { WordModule } from './word/word.module';
+import { CourseEnrollModule } from './course-enroll/course-enroll.module';
+import { LearningSessionModule } from './learning-session/learning-session.module';
+
 
 @Module({
   imports: [
@@ -19,6 +26,12 @@ import { UserModule } from './user/user.module';
     SharedModule,
     AuthModule,
     UserModule,
+    CoursesAdminModule,
+    TopicModule,
+    TopicWordModule,
+    WordModule,
+    CourseEnrollModule,
+    LearningSessionModule,
   ],
   controllers: [AppController],
   providers: [
