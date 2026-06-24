@@ -1,13 +1,12 @@
 import { Pointer, Volume2 } from "lucide-react";
 import { useState } from "react";
 
-const FlashcardWord = () => {
+const FlashcardWord = ({ word }) => {
+  console.log(word);
   const [isFlipped, setIsFlipped] = useState(false);
-
+  const { term, definitions, examples, phonetic } = word;
   return (
-    // Wrapper ngoài: chứa audio button + card, dùng relative để audio button định vị
     <div className="relative mt-12 mb-8">
-      {/* Audio Button — nằm NGOÀI card, không bị flip */}
       <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-10">
         <button
           className="
@@ -62,9 +61,7 @@ const FlashcardWord = () => {
 
           <div className="mt-5 text-center max-w-72">
             <p className="text-xl leading-relaxed text-gray-800 font-medium">
-              I have an English{" "}
-              <span className="font-bold underline">examination</span> next
-              week.
+              {examples[0]?.sentence ?? ""}
             </p>
           </div>
 
@@ -86,9 +83,11 @@ const FlashcardWord = () => {
             [transform:rotateY(180deg)]
           "
         >
-          <p className="text-3xl font-bold text-gray-800">examination</p>
-          <p className="text-gray-400 text-lg">/ɪɡˌzæmɪˈneɪʃn/</p>
-          <p className="text-xl text-gray-600 mt-1">Kiểm tra, kỳ thi (n)</p>
+          <p className="text-3xl font-bold text-gray-800">{term}</p>
+          <p className="text-gray-400 text-lg">{phonetic}</p>
+          <p className="text-xl text-gray-600 mt-1">
+            {definitions[0].meaning} ({definitions[0].wordType})
+          </p>
 
           <div className="absolute bottom-4 right-5 opacity-50">
             <Pointer size={36} className="text-[#F1C27D]" fill="#F1C27D" />

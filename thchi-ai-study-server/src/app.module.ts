@@ -8,15 +8,17 @@ import { AuthModule } from './auth/auth.module';
 import { MyZodValidationPipe } from './auth/config/custom-zod-validation';
 import { HttpExceptionFilter } from './auth/config/http-exception.filter';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { CourseEnrollModule } from './course-enroll/course-enroll.module';
 import { CoursesAdminModule } from './courses/admin/courses.admin.module';
+import { CoursesModule } from './courses/user/courses.module';
+import { LearningSessionModule } from './learning-session/learning-session.module';
 import { SharedModule } from './shared/modules/shared.module';
 import { TopicWordModule } from './topic-word/topic-word.module';
 import { TopicModule } from './topic/topic.module';
 import { UserModule } from './user/user.module';
 import { WordModule } from './word/word.module';
-import { CourseEnrollModule } from './course-enroll/course-enroll.module';
-import { LearningSessionModule } from './learning-session/learning-session.module';
-
+import { NotebookModule } from './notebook/notebook.module';
+import { ReviewSessionModule } from './review-session/review-session.module';
 
 @Module({
   imports: [
@@ -27,11 +29,14 @@ import { LearningSessionModule } from './learning-session/learning-session.modul
     AuthModule,
     UserModule,
     CoursesAdminModule,
+    CoursesModule,
     TopicModule,
     TopicWordModule,
     WordModule,
     CourseEnrollModule,
     LearningSessionModule,
+    NotebookModule,
+    ReviewSessionModule,
   ],
   controllers: [AppController],
   providers: [

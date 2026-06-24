@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AccountStatus, AuthProvider, OtpType } from 'generated/prisma/enums';
 import { AccessTokenPayload, GoogleUser } from 'src/shared/interfaces/IUser';
 import { VerifyOtpType } from 'src/shared/schemas/otp.schema';
@@ -19,7 +20,6 @@ import { ForgotPasswordType } from './schemas/forgot.password.schema';
 import type { LoginDto } from './schemas/login.schema';
 import type { RegisterDto } from './schemas/register.schema';
 import { ResetPasswordType } from './schemas/reset.password.schema';
-import { Response } from 'express';
 @Injectable()
 export class AuthService {
   constructor(
@@ -120,7 +120,7 @@ export class AuthService {
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 7 * 1000,
       });
-      return { message: 'Đăng nhập thành công' };
+      return { message: 'Đăng nhập thành công', accessToken, refreshToken };
     } else {
       throw new BadRequestException(
         'Tài khoản bị khóa hoặc không hoạt động. Vui lòng liên hệ quản trị viên',

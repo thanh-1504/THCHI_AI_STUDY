@@ -8,6 +8,8 @@ const LoginSchema = UserSchema.pick({
 
 const LoginResponseSchema = z.object({
   message: z.string(),
+  accessToken: z.string(),
+  refreshToken: z.string(),
 });
 
 export { LoginResponseSchema, LoginSchema };

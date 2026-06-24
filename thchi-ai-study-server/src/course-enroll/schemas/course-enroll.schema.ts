@@ -1,15 +1,14 @@
 import z from 'zod';
 
 const CourseEnrollSchema = z.object({
-  userId: z.string().uuid(),
-  courseId: z.string().uuid(),
+  userId: z.string(),
+  courseId: z.string(),
   enrolledAt: z.date().default(new Date()),
   completedAt: z.date().optional(),
   lastAccessedAt: z.date().optional(),
 });
 
 export const CreateCourseEnrollSchema = CourseEnrollSchema.pick({
-  userId: true,
   courseId: true,
 });
 export type CourseEnrollType = z.infer<typeof CourseEnrollSchema>;

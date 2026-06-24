@@ -16,12 +16,10 @@ export class LearningSessionService {
   }
 
   async createLearningSessionLog(
-    learningSessionId: string,
     userId: string,
     createLearningSessionDTO: CreateLearningLogType,
   ) {
     return await this.learningSessionRepo.createLearningSessionLog(
-      learningSessionId,
       userId,
       createLearningSessionDTO,
     );

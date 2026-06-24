@@ -2,9 +2,8 @@ import { LearnStep } from 'generated/prisma/enums';
 import z from 'zod';
 
 export const LearningLogSchema = z.object({
-  userId: z.string().uuidv4(),
-  learningSessionId: z.string().uuidv4(),
-  wordId: z.string().uuidv4(),
+  learningSessionId: z.string(),
+  wordId: z.string(),
   step: z.nativeEnum(LearnStep),
   isCorrect: z.boolean(),
   attemptCount: z.number().default(1),

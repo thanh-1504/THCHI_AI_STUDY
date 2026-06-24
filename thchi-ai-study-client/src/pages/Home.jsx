@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import AchievementModal from "../components/modals/AchievementModal";
 import SettingModal from "../components/modals/SettingModal";
@@ -27,10 +27,12 @@ const Home = () => {
       <SidebarLeft></SidebarLeft>
 
       {/* Main Content */}
-      <div className="w-[60%] pt-0 p-6 mx-auto bg-white">
-        {/* <Chart /> */}
-        <Outlet />
-      </div>
+      <Suspense fallback={<div>Loading</div>}>
+        <div className="w-[60%] pt-0 p-6 mx-auto bg-white">
+          {/* <Chart /> */}
+          <Outlet />
+        </div>
+      </Suspense>
 
       {/* Sidebar Right */}
       <SidebarRight></SidebarRight>

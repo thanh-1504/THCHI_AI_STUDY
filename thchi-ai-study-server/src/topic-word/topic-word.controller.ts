@@ -11,7 +11,7 @@ import { CreateTopicWordDTO } from './dto/create-topic-word.dto';
 import { UpdateTopicWordDto } from './dto/update-topic-word.dto';
 import { TopicWordService } from './topic-word.service';
 
-@Controller('topics')
+@Controller('topic-word')
 export class TopicWordController {
   constructor(private readonly topicWordService: TopicWordService) {}
 
@@ -23,10 +23,10 @@ export class TopicWordController {
     return this.topicWordService.create(topicId, createTopicWordDto);
   }
 
-  // @Get(':topicId')
-  // findTopicWords(@Param('topicId') topicId: string) {
-  //   return this.topicWordService.findAllByTopic(topicId);
-  // }
+  @Get(':topicId')
+  findTopicIncludeWords(@Param('topicId') topicId: string) {
+    return this.topicWordService.findTopicIncludeWords(topicId);
+  }
 
   @Get(':topicId/words/:wordId')
   findWordInTopic(

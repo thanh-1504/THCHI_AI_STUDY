@@ -18,20 +18,15 @@ export class LearningSessionRepo {
     return learningSession;
   }
 
-  createLearningSessionLog(
-    learningSessionId: string,
-    userId: string,
-    payload: CreateLearningLogType,
-  ) {
+  createLearningSessionLog(userId: string, payload: CreateLearningLogType) {
     const learningSessionLog = this.prismaService.learningLog.create({
       data: {
         userId,
-        learningSessionId,
+        learningSessionId: payload.learningSessionId,
         wordId: payload.wordId,
         step: payload.step,
         isCorrect: payload.isCorrect,
         attemptCount: payload.attemptCount,
-        completedAt: payload.completedAt,
       },
     });
     return learningSessionLog;

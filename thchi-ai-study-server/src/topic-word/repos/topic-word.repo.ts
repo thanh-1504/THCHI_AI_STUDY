@@ -30,16 +30,39 @@ export class TopicWordRepo {
     });
   }
 
-  findAllByTopic(topicId: string) {
+  findTopicIncludeWords(topicId: string) {
     return this.prismaService.topicWord.findMany({
       where: { topicId },
-      include: {
+      select: {
+        id: true,
+        topicId: true,
+        imageUrl: true,
         word: {
-          include: {
-            definitions: true,
-            examples: true,
+          select: {
+            id: true,
+            term: true,
+            phonetic: true,
+            audioUrl: true,
+            definitions: {
+              select: {
+                id: true,
+                wordType: true,
+                meaning: true,
+              },
+            },
+            examples: {
+              select: {
+                id: true,
+                sentence: true,
+                translation: true,
+                isAiGenerated: true,
+              },
+            },
           },
         },
+      },
+      orderBy: {
+        orderIndex: 'asc',
       },
     });
   }

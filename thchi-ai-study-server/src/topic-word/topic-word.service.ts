@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTopicWordType } from './dto/create-topic-word.dto';
 import { UpdateTopicWordType } from './dto/update-topic-word.dto';
 import { TopicWordRepo } from './repos/topic-word.repo';
+import { TopicIncludeWordSchema } from './schemas/topic-word.schema';
 
 @Injectable()
 export class TopicWordService {
@@ -11,8 +12,14 @@ export class TopicWordService {
     return await this.topicWordRepo.create(topicId, createTopicWordDto);
   }
 
-  findAll() {
-    return `This action returns all topicWord`;
+  async findTopicIncludeWords(topicId: string) {
+    const result = await this.topicWordRepo.findTopicIncludeWords(topicId);
+    if (!result) throw new NotFoundException();
+    const parsed = TopicIncludeWordSchema.safeParse(result);
+    if (!parsed.success) {
+      console.error(parsed.error);
+    }
+    return parsed.data;
   }
 
   async findOne(topicId: string, wordId: string) {

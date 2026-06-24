@@ -34,11 +34,18 @@ export class CourseEnrollRepo {
   }
 
   create(payload: CreateCourseEnrollType, userId: string) {
-    return this.prismaService.courseEnrollment.create({
-      data: {
+    return this.prismaService.courseEnrollment.upsert({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId: payload.courseId,
+        },
+      },
+      create: {
         userId,
         courseId: payload.courseId,
       },
+      update: { lastAccessedAt: new Date() },
     });
   }
 }

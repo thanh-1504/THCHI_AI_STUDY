@@ -1,10 +1,18 @@
 import { useNavigate } from "react-router-dom";
+import learnServices from "../services/learn.service";
 
-const ItemTopic = () => {
+const ItemTopic = ({ topic }) => {
   const navigate = useNavigate();
+
+  const handleClick = async () => {
+    const learningSession = await learnServices.createLearningSession(topic.id);
+    navigate(`/learning/${topic.id}?sessionId=${learningSession.id}`);
+  };
+
   return (
     <div
-      onClick={() => navigate("/learn/1")}
+      key={topic.id}
+      onClick={handleClick}
       className="bg-(image:--my-topic-green-gradient) rounded-2xl p-3 mb-2 cursor-pointer transition-all duration-200 hover:bg-(image:--my-topic-green-hover-gradient) shadow-topic-green active:shadow-none active:translate-y-[8px]"
     >
       <div className="flex items-center gap-x-3">
@@ -16,8 +24,8 @@ const ItemTopic = () => {
           />
         </div>
         <div>
-          <h3 className="text-white font-bold text-2xl">Schools</h3>
-          <span className="text-white">1.Trường học</span>
+          <h3 className="text-white font-bold text-2xl">{topic.title}</h3>
+          <span className="text-white">{topic.subtitle}</span>
         </div>
       </div>
     </div>

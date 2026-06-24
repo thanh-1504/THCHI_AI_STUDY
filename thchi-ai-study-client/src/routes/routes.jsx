@@ -20,11 +20,13 @@ import CommunityMyPost from "../pages/Community/CommunityMyPost";
 import Dictionary from "../pages/Dictionary/Dictionary";
 import Home from "../pages/Home";
 import Learn from "../pages/Learn/Learn";
+import LearnCourseDetail from "../pages/Learn/LearnCourseDetail";
 import Learning from "../pages/Learn/Learning";
 import Notebook from "../pages/Notebook/Notebook";
 import NotebookActive from "../pages/Notebook/NotebookActive";
 import Rank from "../pages/Rank/Rank";
 import Review from "../pages/Review";
+import learnServices from "../services/learn.service";
 const router = createBrowserRouter([
   // App Routes
   {
@@ -42,6 +44,12 @@ const router = createBrowserRouter([
           {
             element: <Learn />,
             path: "/learn",
+            loader: learnServices.getCourses,
+          },
+          {
+            element: <LearnCourseDetail />,
+            path: "/learn/:id",
+            loader: ({ params }) => learnServices.getCourse(params.id),
           },
           {
             element: <Notebook />,
@@ -70,8 +78,11 @@ const router = createBrowserRouter([
 
   // Learning Route
   {
-    path: "/learn/:id",
+    path: "/learning/:topicId",
     element: <Learning />,
+    loader: ({ params }) => {
+      return learnServices.getTopicIncludeWord(params.topicId);
+    },
   },
 
   // User Auth Routes

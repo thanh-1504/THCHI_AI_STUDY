@@ -64,6 +64,22 @@ export class CourseRepo {
   findCourseForUser() {
     return this.prisma.course.findMany({
       where: { deletedAt: null, isPublished: true },
+      select: {
+        id: true,
+        title: true,
+        subtitle: true,
+        description: true,
+        imageUrl: true,
+        topics: {
+          where: { deletedAt: null },
+          select: {
+            id: true,
+            courseId: true,
+            title: true,
+            imageUrl: true,
+          },
+        },
+      },
     });
   }
 

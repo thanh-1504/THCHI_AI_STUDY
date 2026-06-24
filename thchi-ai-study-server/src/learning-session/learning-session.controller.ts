@@ -10,22 +10,20 @@ export class LearningSessionController {
     private readonly learningSessionService: LearningSessionService,
   ) {}
 
-  @Post('/:topicId')
-  create(@Param('topicId') topicId: string, @User('id') userId: string) {
-    return this.learningSessionService.create(userId, topicId);
-  }
-
-  @Post('/:id/log')
+  @Post('/log')
   createLearningSessionLog(
-    @Param('id') learningSessionId: string,
     @User('id') userId: string,
     @Body() createLearningSessionDTO: CreateLearningLogDTO,
   ) {
     return this.learningSessionService.createLearningSessionLog(
-      learningSessionId,
       userId,
       createLearningSessionDTO,
     );
+  }
+
+  @Post('/:topicId')
+  create(@Param('topicId') topicId: string, @User('id') userId: string) {
+    return this.learningSessionService.create(userId, topicId);
   }
 
   @Post('/:id/complete')
