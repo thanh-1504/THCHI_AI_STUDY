@@ -8,8 +8,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { PaginationQueryDTO } from '../../shared/dtos/pagination.dto';
 import { CreateCourseDTO } from '../dto/create-course.dto';
-import { PaginationQueryDTO } from '../dto/pagination.dto';
 import { UpdateCourseDTO } from '../dto/update-course.dto';
 import { CoursesAdminService } from './courses.amin.service';
 

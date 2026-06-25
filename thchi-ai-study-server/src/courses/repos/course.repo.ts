@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { CreateCourseType } from '../dto/create-course.dto';
-import { PaginationQueryType } from '../dto/pagination.dto';
 import { UpdateCourseType } from '../dto/update-course.dto';
+import { PaginationQueryType } from 'src/shared/types/pagination.type';
 
 @Injectable()
 export class CourseRepo {

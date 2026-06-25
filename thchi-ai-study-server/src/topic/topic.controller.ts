@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CreateTopicDTO } from './dto/create-topic.dto';
-import { PaginationQueryDTO } from './dto/pagination.dto';
+import { PaginationTopicQueryDTO } from './dto/pagination.dto';
 import { UpdateTopicDTO } from './dto/update-topic.dto';
 import { TopicService } from './topic.service';
 
@@ -23,7 +23,7 @@ export class TopicController {
   }
 
   @Get()
-  findAll(@Query() paginationQuery: PaginationQueryDTO) {
+  findAll(@Query() paginationQuery: PaginationTopicQueryDTO) {
     return this.topicService.findAll(paginationQuery);
   }
 

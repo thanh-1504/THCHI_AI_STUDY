@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCourseType } from '../dto/create-course.dto';
-import { PaginationQueryType } from '../dto/pagination.dto';
 import { UpdateCourseType } from '../dto/update-course.dto';
 import { CourseRepo } from '../repos/course.repo';
+import { PaginationQueryType } from 'src/shared/types/pagination.type';
 
 @Injectable()
 export class CoursesService {

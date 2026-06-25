@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { CreateTopicType } from '../dto/create-topic.dto';
-import { PaginationQueryType } from '../dto/pagination.dto';
+import { PaginationTopicQueryType } from '../dto/pagination.dto';
 import { UpdateTopicType } from '../dto/update-topic.dto';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class TopicRepo {
     });
   }
 
-  findAll(pagnitaionQuery: PaginationQueryType) {
+  findAll(pagnitaionQuery: PaginationTopicQueryType) {
     const { page, limit, courseId } = pagnitaionQuery;
     const skip = (page - 1) * limit;
     const take = limit;

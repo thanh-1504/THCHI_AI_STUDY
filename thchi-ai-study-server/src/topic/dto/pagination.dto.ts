@@ -1,10 +1,13 @@
 import { createZodDto } from 'nestjs-zod';
+import { PaginationSchema } from 'src/shared/schemas/pagination.schema';
 import { z } from 'zod';
 
-const PaginationQuerySchema = z.object({
-  page: z.coerce.number().min(1).default(1),
-  limit: z.coerce.number().min(1).max(100).default(10),
+const PaginationTopicQuerySchema = PaginationSchema.extend({
   courseId: z.string().uuid().optional(),
 });
-export type PaginationQueryType = z.infer<typeof PaginationQuerySchema>;
-export class PaginationQueryDTO extends createZodDto(PaginationQuerySchema) {}
+export type PaginationTopicQueryType = z.infer<
+  typeof PaginationTopicQuerySchema
+>;
+export class PaginationTopicQueryDTO extends createZodDto(
+  PaginationTopicQuerySchema,
+) {}

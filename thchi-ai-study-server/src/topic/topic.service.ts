@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateTopicType } from './dto/create-topic.dto';
-import { PaginationQueryType } from './dto/pagination.dto';
+import { PaginationTopicQueryType } from './dto/pagination.dto';
 import { UpdateTopicType } from './dto/update-topic.dto';
 import { TopicRepo } from './repos/topic.repo';
 
@@ -25,7 +25,7 @@ export class TopicService {
     return await this.topicRepo.create(createTopicDto);
   }
 
-  async findAll(paginationQueryDTO: PaginationQueryType) {
+  async findAll(paginationQueryDTO: PaginationTopicQueryType) {
     const { page, limit } = paginationQueryDTO;
     const [total, topics] = await this.topicRepo.findAll({ page, limit });
     const totalPage = Math.ceil(total / limit);

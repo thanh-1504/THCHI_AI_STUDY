@@ -8,6 +8,11 @@ import { UpdateUserType } from '../schemas/update.user.schema';
 @Injectable()
 export class UserRepository {
   constructor(private readonly prismaService: PrismaService) {}
+
+  findAllUser() {
+    return this.prismaService.user.findMany();
+  }
+
   findUserByEmail(email: string) {
     return this.prismaService.user.findUnique({
       where: { email },
