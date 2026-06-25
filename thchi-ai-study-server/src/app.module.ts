@@ -19,6 +19,7 @@ import { UserModule } from './user/user.module';
 import { WordModule } from './word/word.module';
 import { NotebookModule } from './notebook/notebook.module';
 import { ReviewSessionModule } from './review-session/review-session.module';
+import { UserProfileModule } from './user-profile/user-profile.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ReviewSessionModule } from './review-session/review-session.module';
     LearningSessionModule,
     NotebookModule,
     ReviewSessionModule,
+    UserProfileModule,
   ],
   controllers: [AppController],
   providers: [

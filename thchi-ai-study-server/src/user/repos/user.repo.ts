@@ -54,10 +54,19 @@ export class UserRepository {
     });
   }
 
-  updateUser(email: string, payload: UpdateUserType) {
+  updateUser(
+    where: { id: string } | { email: string },
+    payload: UpdateUserType,
+  ) {
     return this.prismaService.user.update({
-      where: { email },
+      where: { ...where, deletedAt: null },
       data: { ...payload },
+      omit: {
+        password: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+      },
     });
   }
 }

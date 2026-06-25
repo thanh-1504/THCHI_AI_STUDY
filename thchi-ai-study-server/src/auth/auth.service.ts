@@ -49,9 +49,12 @@ export class AuthService {
     });
     await this.otpService.deleteOtp({ email, type });
     if (type == OtpType.REGISTER) {
-      await this.userRepo.updateUser(email, {
-        status: AccountStatus.ACTIVE,
-      });
+      await this.userRepo.updateUser(
+        { email },
+        {
+          status: AccountStatus.ACTIVE,
+        },
+      );
       const user = await this.userRepo.findUserByEmail(email);
       if (!user) throw new BadRequestException('Không tìm thấy người dùng');
       return this.generateTokens({
@@ -149,9 +152,12 @@ export class AuthService {
         'Reset token không hợp lệ hoặc đã hết hạn',
       );
     }
-    await this.userRepo.updateUser(email, {
-      password: await this.hashingService.hashPassword(payload.password),
-    });
+    await this.userRepo.updateUser(
+      { email },
+      {
+        password: await this.hashingService.hashPassword(payload.password),
+      },
+    );
     return { message: 'Đặt lại mật khẩu thành công' };
   }
 

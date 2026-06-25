@@ -20,7 +20,7 @@ export class UserService {
   ) {
     const user = await this.userRepo.findUserByIdOrEmail(where);
     if (!user) throw new BadRequestException('Không tìm thấy người dùng');
-    return await this.userRepo.updateUser(user.email, updateUserDto);
+    return await this.userRepo.updateUser({ email: user.email }, updateUserDto);
   }
   // remove(id: number) {
   //   return `This action removes a #${id} user`;
