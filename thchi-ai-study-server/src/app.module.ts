@@ -15,6 +15,9 @@ import { CoursesAdminModule } from './courses/admin/courses.admin.module';
 import { CoursesModule } from './courses/user/courses.module';
 import { LearningSessionModule } from './learning-session/learning-session.module';
 import { NotebookModule } from './notebook/notebook.module';
+import { MomoModule } from './payments/momo/momo.module';
+import { VNPayModule } from './payments/vnpay/vnpay.module';
+import { PremiumModule } from './premium/premium.module';
 import { ReviewSessionModule } from './review-session/review-session.module';
 import { SharedModule } from './shared/modules/shared.module';
 import { TopicWordModule } from './topic-word/topic-word.module';
@@ -22,7 +25,7 @@ import { TopicModule } from './topic/topic.module';
 import { UserProfileModule } from './user-profile/user-profile.module';
 import { UserModule } from './user/user.module';
 import { WordModule } from './word/word.module';
-import { PremiumModule } from './premium/premium.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -44,6 +47,9 @@ import { PremiumModule } from './premium/premium.module';
     UserProfileModule,
     AdminModule,
     PremiumModule,
+    MomoModule,
+    VNPayModule,
+    TransactionModule,
   ],
   controllers: [AppController],
   providers: [
