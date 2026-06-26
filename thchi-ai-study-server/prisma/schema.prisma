@@ -267,8 +267,10 @@ model UserAchievement {
 model PremiumPlan {
   id          String          @id @default(uuid())
   name        String
-  duration    PremiumDuration
+  duration    PremiumDuration @unique
   price       Decimal         @db.Decimal(12, 2)
+  originalPrice Decimal?        @db.Decimal(12, 2)
+  badge         String?
   description String?
   isActive    Boolean         @default(true)
   createdAt   DateTime        @default(now())
@@ -277,7 +279,6 @@ model PremiumPlan {
 
   subscriptions Subscription[]
   transactions  Transaction[]
-
   @@map("premium_plans")
 }
 

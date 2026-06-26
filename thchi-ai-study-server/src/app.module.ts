@@ -22,6 +22,7 @@ import { TopicModule } from './topic/topic.module';
 import { UserProfileModule } from './user-profile/user-profile.module';
 import { UserModule } from './user/user.module';
 import { WordModule } from './word/word.module';
+import { PremiumModule } from './premium/premium.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { WordModule } from './word/word.module';
     ReviewSessionModule,
     UserProfileModule,
     AdminModule,
+    PremiumModule,
   ],
   controllers: [AppController],
   providers: [
